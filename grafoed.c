@@ -1,9 +1,11 @@
 typedef struct grafo{
   TNO * prim;
+  int numCores;
 }TG;
 
 typedef struct no{
   int id;
+  int cor;
   TViz * prim_viz;
   struc no * prox_no;
 }TNO;
@@ -16,9 +18,10 @@ typedef struct viz{
 
 TNO * buscaNo(TG * g, int elem){};
 /**            PERGUNTAS PRA FAZER PRA TIA BEBEL <3
-+Perguntar se grafos com somente um no devem ser tratados
-+Perguntar se podem existir nos com valores repetidos em um grafo
++Perguntar se podem existir nos com valores repetidos em um grafo R: Não
 +Perguntar se eu posso usar estruturas auxiliares para guardar pontes
++Perguntar se grafos unicos com autoloop existem      R: Não
++Perguntar se grafos unicos sao conexos os desconexos R: Desconexos
 */
 
 /**
@@ -32,7 +35,7 @@ Repete para todos os nos
 A logica:
       Dado um grafo com M nos:
       Se todos os nos sao alcancaveis a partir dos outros nos, ele nao e orientado.
-      Logo, se existe um no para qual essa sentenca e falsa, o grafo e orientado.
+      Lgo, se existe um no para qual essa sentenca e falsa, o grafo e orientado.
 
 Implementado mais facilmente usando buscaAresta
 
@@ -50,9 +53,9 @@ int checaOrientacao(TG * g){
       TViz * vizinhosBusca = vizinho->prim_viz;
 
       while((vizinhoBusca->id_viz != p->id)&&(vizinnhosBusca)){
+        if(!vizinhosBusca) return 1;
         vizinhosBusca = vizinhosBusca->prox_viz;
       }
-      if(!vizinhosBusca) return 1;
       v=v->prox_viz;
     }
     p=p->prox_no;
@@ -96,11 +99,27 @@ Para todos os nos do grafo
         se ele alcanca, pinta da mesma cor
         se nao alcanca, pinta da proxima cor
 
-
 No pior caso, o numero de cores sera o numero de nos informado no arquivo(ou seja,
 grafo totalmente desconexo).
 No melhor caso, o numero de cores sera igual a 1(ou seja, grafo totalmente conexo)
+
 */
+
+int conexo(TG * g){
+  if(!g) return 0;
+  TNO * p = g->prim;
+  if(!p->prox_no) return 1;
+  int cor = g->numCores;
+  while(p){
+    TNO * q = p->prox_no;
+    while(q)
+    if(!procuraCaminho(g,p->id,q->id)) return 0;
+
+
+
+  }
+}
+
 
 
 /**TODO
