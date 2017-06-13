@@ -1,21 +1,6 @@
-typedef struct grafo{
-  TNO * prim;
-  int numCores;
-}TG;
-
-typedef struct no{
-  int id;
-  int cor;
-  TViz * prim_viz;
-  struc no * prox_no;
-}TNO;
-
-typedef struct viz{
-  int id_viz;
-  int custo;
-  struct viz * prox_viz;
-}TViz;
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <grafo.h>
 TNO * buscaNo(TG * g, int elem){};
 /**            PERGUNTAS PRA FAZER PRA TIA BEBEL <3
 +Perguntar se podem existir nos com valores repetidos em um grafo R: Não
@@ -52,7 +37,7 @@ int checaOrientacao(TG * g){
       TNO * vizinho = buscaNo(g,v->id_viz);
       TViz * vizinhosBusca = vizinho->prim_viz;
 
-      while((vizinhoBusca->id_viz != p->id)&&(vizinnhosBusca)){
+      while((vizinhoBusca->id_viz != p->id_no)&&(vizinnhosBusca)){
         if(!vizinhosBusca) return 1;
         vizinhosBusca = vizinhosBusca->prox_viz;
       }
