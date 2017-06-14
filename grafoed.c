@@ -2,6 +2,10 @@
 #include <stdlib.h>
 #include <grafo.h>
 TNO * buscaNo(TG * g, int elem){};
+void removeNO(TG * g, int elem){};
+void removeAresta(TG * g, int no1, int no2){};
+TViz * buscaAresta(TG * g, int no1, int no2){};
+
 /**            PERGUNTAS PRA FAZER PRA TIA BEBEL <3
 +Perguntar se podem existir nos com valores repetidos em um grafo R: Não
 +Perguntar se eu posso usar estruturas auxiliares para guardar pontes
@@ -54,7 +58,6 @@ Para todos os vizinhos de V
     Se W e vizinho de V, retorna 1
     Se nao, procura W a partir do vizinho de V
 
-(Preciso pintar?)
 */
 int procuraCaminho(TG * g, int id1, int id2){
   if(!g) return 0;
@@ -150,7 +153,39 @@ Procura um caminho do no V ate o no W
     se nao, e uma ponte
 Insere a aresta novamente
 */
+int verificaPonte(TG * g, int id1, int id2){
+  if(!g) return;
 
+  TNO * no1 = buscaNo(g, id1);
+  if(!no1) return 0;
+  TNO * no2 = buscaNo(g, id2);
+  if(!no2) return 0;
+  TViz * aresta = buscaAresta(g, id1, id2);
+  if(!aresta) return 0;
+
+  removeAresta(g,id1,id2);
+  removeAresta(g,id2,id1);
+
+  int caminho = procuraCaminho(g,id1,id2);
+
+  if(!caminho) return 0;
+  return 1;
+}
+
+void achaPontes(TG * g){
+  if(!g) return 0;
+  TNO * p = g->prim;
+  while(p && !p->prim_viz){
+    p=p->prox_no;
+  }
+  if(!p) return;
+  TViz * a = p->prim_viz;
+  while(a){
+    TNO * v = buscaNo(g,v->id_viz);
+    
+  }
+
+}
 
 /**TODO
                       Checando componente conexa
