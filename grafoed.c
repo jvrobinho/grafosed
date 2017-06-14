@@ -70,7 +70,12 @@ int procuraCaminho(TG * g, int id1, int id2){
 
   while(v && (!resp)){
     if(v->id_viz == id2) return 1;
+
+    if(!v->passou){
+    v->passou = 1;
     resp = procuraCaminho(g,v->id_viz,id2);
+    v->passou = 0;
+    }
     v=v->prox_viz;
   }
   return resp;
@@ -82,7 +87,7 @@ int procuraCaminho(TG * g, int id1, int id2){
 Para todos os nos do grafo
     vejo se ele alcanca outros nos(procuraCaminho)
         se ele alcanca, pinta da mesma cor
-        se nao alcanca, pinta da proxima cor
+        se nao alcanca, pinta o subgrafo da proxima cor
 
 No pior caso, o numero de cores sera o numero de nos informado no arquivo(ou seja,
 grafo totalmente desconexo).
@@ -95,14 +100,43 @@ int conexo(TG * g){
   TNO * p = g->prim;
   if(!p->prox_no) return 1;
   int cor = g->numCores;
+  p->cor = cor;
+  resp = 1;
   while(p){
-    TNO * q = p->prox_no;
-    while(q)
-    if(!procuraCaminho(g,p->id,q->id)) return 0;
-
-
-
+    TNO * q = g->prim;
+    while(q){
+      if(q->id!=p->id){
+        if(procuraCaminho(g,p->id,q->id) && (!q->cor)){
+          q->cor = p->cor;
+        }
+        else if (!procuraCaminho(g,p->id,q->id) && (!q->cor)){
+          g->numCores++;
+          cor=g->numCores;
+          q->cor = cor;
+          pintaSub(g,q->id);
+          resp = 0;
+        }
+      }
+      q=q->prox_no;
+    }
   }
+  return resp;
+}
+
+void pintaSub(TG * g, int no){//pinta toda a componente conexa
+  if(!g) return;
+  int cor = g->numCores
+  TNO * no1 = buscaNo(g, no);
+  if(!no1) return;
+  if(!no1->cor) no1->cor = cor;
+  TViz * a = no1->prim_viz;
+  while(a){
+    TNO * viz = buscaNo(g,a->id_viz);
+    if(!viz->cor) viz->cor = cor;
+    pintaGrafo(g,a->id_viz);
+    a=a->prox_viz;
+  }
+  return;
 }
 
 
