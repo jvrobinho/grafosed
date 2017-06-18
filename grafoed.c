@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <grafo.h>
+#include "grafo.h"
 
 
 /**            PERGUNTAS PRA FAZER PRA TIA BEBEL <3
@@ -23,12 +23,8 @@ A logica:
       Se todos os nos sao alcancaveis a partir dos outros nos, ele nao e orientado.
       Lgo, se existe um no para qual essa sentenca e falsa, o grafo e orientado.
 
-/*Vou alterar um pouco a logica
 
-Se elas forem fortemente conexas, eu so pinto elas da mesma cor,
-ai eu crio uma função imprime que imprime todos os nos que tiverem a mesma cor.
 
-*/
 Implementado mais facilmente usando buscaAresta
 
 */
@@ -44,7 +40,7 @@ int checaOrientacao(TG * g){
       TNO * vizinho = buscaNo(g,v->id_viz);
       TViz * vizinhosBusca = vizinho->prim_viz;
 
-      while((vizinhoBusca->id_viz != p->id_no)&&(vizinnhosBusca)){
+      while((vizinhosBusca->id_viz != p->id_no)&&(vizinhosBusca)){
         if(!vizinhosBusca) return 1;
         vizinhosBusca = vizinhosBusca->prox_viz;
       }
@@ -69,9 +65,9 @@ int procuraCaminho(TG * g, int id1, int id2){
   TNO * no2 = buscaNo(g, id2);
   if(!no2) return 0;
 
-  if(!no1->prox_viz) return 0;
+  if(!no1->prim_viz) return 0;
 
-  TViz * v = no1->prox_viz;
+  TViz * v = no1->prim_viz;
   int resp = 0;
 
   while(v && (!resp)){
@@ -100,6 +96,35 @@ grafo totalmente desconexo).
 No melhor caso, o numero de cores sera igual a 1(ou seja, grafo totalmente conexo)
 
 */
+void pintaSub(TG * g, int no){//pinta toda a componente conexa
+  if(!g) return;
+  int cor = g->numCores;
+  TNO * no1 = buscaNo(g, no);
+  if(!no1) return;
+  if(!no1->cor) no1->cor = cor;
+  TViz * a = no1->prim_viz;
+  while(a){
+    TNO * viz = buscaNo(g,a->id_viz);
+    if(!viz->cor) viz->cor = cor;
+    pintaSub(g,a->id_viz);
+    a=a->prox_viz;
+  }
+  return;
+}
+
+int verificaCor(TG * g,int id){//verifica se existe algum NO na componente conexa que possua cor
+  if(!g) return 0;
+
+  TNO * no1 = buscaNo(g, id);
+  if(!no1) return 0;
+
+  TNO * no2 = g->prim;
+  while(no2){
+    if(procuraCaminho(g,no1->id_no,no2->id_no) && no2->cor) return no2->cor;
+    no2=no2->prox_no;
+  }
+  return 0;
+}
 
 int conexo(TG * g){
   if(!g) return 0;
@@ -107,7 +132,7 @@ int conexo(TG * g){
   if(!p->prox_no) return 1;
   int cor = g->numCores;
   p->cor = cor;
-  resp = 1;
+  int resp = 1;
   while(p){
     TNO * q = g->prim;
 
@@ -139,35 +164,8 @@ int conexo(TG * g){
   return resp;
 }
 
-void pintaSub(TG * g, int no){//pinta toda a componente conexa
-  if(!g) return;
-  int cor = g->numCores
-  TNO * no1 = buscaNo(g, no);
-  if(!no1) return;
-  if(!no1->cor) no1->cor = cor;
-  TViz * a = no1->prim_viz;
-  while(a){
-    TNO * viz = buscaNo(g,a->id_viz);
-    if(!viz->cor) viz->cor = cor;
-    pintaSub(g,a->id_viz);
-    a=a->prox_viz;
-  }
-  return;
-}
 
-int verificaCor(TG * g,int id){//verifica se existe algum NO na componente conexa que possua cor
-  if(!g) return 0;
 
-  TNO * no1 = buscaNo(g, id);
-  if(!no1) return 0;
-
-  TNO * no2 = g->prim;
-  while(no2){
-    if(procuraCaminho(g,no1->id,no2->id) && no2->cor) return no2->cor;
-    no2=no2->prox_no;
-  }
-  return 0;
-}
 
 /**TODO
 
@@ -180,7 +178,7 @@ Insere a aresta novamente
 */
 
 void achaPontes(TG * g){
-  if(!g) return 0;
+  if(!g) return;
   TNO * p = g->prim;
   while(p){
     while(p && (!p->prim_viz)) p = p->prox_no;
@@ -188,14 +186,17 @@ void achaPontes(TG * g){
     TViz * v = p->prim_viz;
 
     int primAresta = v->id_viz;
-
+    int aux;
     do{
-      int aux = v->id_viz;
+      aux = v->id_viz;
       removeAresta(g,p->id_no,aux);
       int caminho = procuraCaminho(g,p->id_no,aux);
-      if(!caminho){printf("%d faz ponte com %d",p->id_no,aux)}
-      insereAresta(g,p->id_no,aux);
-    }while(aux!=primAresta)
+      if(!caminho){
+        printf("%d faz ponte com %d",p->id_no,aux);
+      }
+      insereAresta(g,p->id_no,aux,0);
+    }while(aux!=primAresta);
+
     p=p->prox_no;
   }
 }
@@ -212,7 +213,7 @@ ai eu crio uma função imprime que imprime todos os nos que tiverem a mesma cor
 */
 void fortementeConexa(TG * g){
   TNO * no1 = g->prim;
-  int corNo1 = no->cor;
+  int corNo1 = no1->cor;
   int totalCores = g->numCores;
   while(no1){
     TNO * no2 = g->prim;
@@ -231,22 +232,42 @@ void fortementeConexa(TG * g){
   }
 }
 TG * criaGrafo(char * nomeArq){
-    FILE * arquivo = fopen(nomeArq,"rt");
-    if(!arquivo) exit(1);
+    printf("Criando grafo");
+    FILE * arquivo = fopen(nomeArq,"r");
 
-    int numNos,no1,no2,n=0;
+    if(!arquivo) {printf("EXIT\n");exit(1);}
+
+    int numNos,no1,no2,n=0,read;
     fscanf(arquivo,"%d",&numNos);
-
+    printf("Inicializando grafo");
     TG* g = inicializa();
 
-    r = fscanf(arquivo,"%d%d",&no1,&no2);
+    read = fscanf(arquivo,"%d %d",&no1,&no2);
     while(n<numNos){
+
       insereNo(g,no1);
-      insereAresta(g,no,no2);
+      insereAresta(g,no1,no2,0);
       n++;
-      r = fscanf(arquivo,"%d %d",&n,&i);
+
+      read = fscanf(arquivo,"%d %d",&no1,&no2);
     }
 
     fclose(arquivo);
     return g;
+}
+
+int main(void){
+  char * nomeArq = malloc(100);
+  printf("Digite o nome do arquivo: ");
+  scanf("%s", nomeArq);
+  TG * l = criaGrafo(nomeArq);
+  printf("Grafo criado!\n");
+  imprime(l);
+
+
+
+
+
+
+
 }
