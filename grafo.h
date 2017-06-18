@@ -24,7 +24,7 @@ typedef struct grafo{
 TG * inicializa(void){
   TG * g = (TG*)malloc(sizeof(TG));
   g->prim = NULL;
-  int numCores = 1;
+  g->numCores = 1;
   return g;
 }
 void imprime(TG * g){
@@ -33,21 +33,16 @@ void imprime(TG * g){
         printf("%d \n", p->id_no);
         TViz * v = p->prim_viz;
         while(v){
-            printf("viz: %d \t custo: %d", v->id_viz, v->custo);
+            printf("viz: %d \t custo: %d\n", v->id_viz, v->custo);
             v=v->prox_viz;
         }
         p=p->prox_no;
     }
 }
-TNO * buscaNo(TG * g, int elem){
-  TNO * no = g->prim;
-  while(no){
-    if(elem== no->id_no){
-      return no;
-    }
-    no = no->prox_no;
-  }
-  return NULL;
+TNO * buscaNo(TG * g, int no){
+  TNO * p = g->prim;
+  while((p)&&p->id_no!=no)p=p->prox_no;
+  return p;
 }
 
 void insereNo(TG * g, int elem){
@@ -64,7 +59,7 @@ void insereNo(TG * g, int elem){
       g->prim = no;
       return;
     }
-
+	aux = g->prim;
     while(aux->prox_no){
         aux = aux->prox_no;
     }
@@ -118,21 +113,29 @@ void insereAresta(TG * g, int no1, int no2, int custo){
     if(!n1) return;
     TNO * n2 = buscaNo(g,no2);
     if(!n2) return;
-    TViz * aresta = buscaAresta(g,no1,no2);
-    if(aresta){
-      aresta->custo = custo;
+    TViz * viz = buscaAresta(g,no1,no2);
+    if(viz){
+      viz->custo = custo;
       return;
     }
-    TViz * viz = n1->prim_viz;
-    while(viz->prox_viz){
-      viz= viz->prox_viz;
-    }
-    viz->prox_viz = (TViz*) malloc (sizeof(TViz));
-    viz = viz->prox_viz;
+    TViz * aux = n1->prim_viz;
+
+
+    viz = (TViz*) malloc (sizeof(TViz));
     viz->custo = custo;
     viz->id_viz = n2->id_no;
     viz->passou = 0;
-
+    if(aux){
+      while(aux->prox_viz) aux = aux->prox_viz;
+      printf("Chegou no ultimo\n");
+      viz->prox_viz = aux->prox_viz;
+      aux->prox_viz = viz;
+      return;
+    }
+    viz->prox_viz = n1->prim_viz;
+    n1->prim_viz = viz;
+    printf("Criou\n");
+    return;
 }
 void removeAresta(TG * g, int no1, int no2){
   TNO * n1 = buscaNo(g,no1);
