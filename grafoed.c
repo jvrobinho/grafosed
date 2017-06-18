@@ -149,6 +149,27 @@ void libera (TG * g){
     }
 }
 
+
+
+void fortementeConexa(TG * g){
+    TNO * no1 = g->prim;
+    while(no1){
+        TNO * no2 = g->prim;
+        if(no1!= no2){
+            while(no2){
+                TViz a1 = buscaAresta(g,no1->id_no,no2->id_no);
+                TViz a2 = buscaAresta(g,no2->id_no,no1->id_no);
+                if(a1 && a2){
+                    //Printa que o nome das duas sendo conexas;
+                }
+            no2 = no2->prox_no;
+            }
+        }
+        no1 = no1->prox_no;
+    }
+
+
+}
 /**            PERGUNTAS PRA FAZER PRA TIA BEBEL <3
 +Perguntar se podem existir nos com valores repetidos em um grafo R: Não
 +Perguntar se eu posso usar estruturas auxiliares para guardar pontes
