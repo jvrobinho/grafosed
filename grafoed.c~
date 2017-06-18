@@ -1,153 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <grafo.h>
-typedef struct grafo{
-  TNO * prim;
-  int numCores;
-}TG;
-
-typedef struct no{
-  int id_no;
-  int cor;
-  TViz * prim_viz;
-  struc no * prox_no;
-}TNO;
-
-typedef struct viz{
-  int id_viz;
-  int custo;
-  struct viz * prox_viz;
-}TViz;
-
-
-void imprime (TG * g ){
-    TNO * p = g->prim;
-    while(p){
-        printf("%d \n", p->id_no);
-        TViz * v = p->prim_viz;
-        while(v){
-            printf("viz: %d \t custo: %d", v->id_viz, v->custo);
-            v=v->prox_viz;
-        }
-        p=p->prox_no;
-    }
-}
-void insereNo(TG * g, int elem){
-    TNO * aux = g->prim;
-    TNO * no = (TNO*)malloc(sizeof(TNO));
-    while(aux->prox_no){
-        aux = aux->prox_no;
-    } 
-    aux->prox_no = no;
-    no->id_no = elem;
-} 
-TNO * buscaNo(TG * g, int elem){
-    TNO * no = g->prim;
-    while(no){
-        if(elem== no->id_no){
-            return no;
-        }  
-        no = no->prox_no;
-    }
-    return null; 
-}
-void removeNO(TG * g, int elem){
-    TNO no = buscaNO(g, elem);
-    if(!no)
-        return;  
-    }  
-    while(no->prim_viz){
-        TNO * viz = no->prim_viz;
-        no->prim_viz = viz->prox_viz;
-        free(viz); 
-    }
-    free(no); 
-    TNO * aux = g->prim;
-
-    while(aux){
-        TViz * aux_viz = aux->prim_viz;
-        while(aux_viz){
-            if(aux_viz->id_viz == elem){
-                TViz * c = aux_viz;
-                aux_viz = aux_viz->prox_viz;
-                free(c); 
-            }  
-            aux = aux->prox_no;
-        }            
-    }
-     
-}
-
-
-TViz * buscaAresta(TG * g, int no1, int no2){
-    TNO * no = g->prim;
-    while(no){
-        if(no->id_no == no1){
-            TViz aresta = no->prim_viz;
-            while(aresta){
-                if(aresta->id_viz == no2){
-                    return aresta;   
-                }
-            }
-            return; 
-        }
-    }
-    return; 
-}
-void insereAresta(TG * g, int no1, int no2, int custo){
-    TViz aresta = buscaAresta(g,no1,no2);
-    if(aresta){
-    return;
-    }
-    TNO * n1 = buscaNo(g,no1);
-    TNO * n2 = buscaNo(g,no2);
-    if(n1 && n2){
-        TViz viz = n1->prim_viz;
-        while(viz->prox_viz){
-        viz= viz->prox_viz;
-        }
-        viz->prox_viz = (TViz*) malloc (sizeof(TViz));
-        viz = viz->prox_viz;
-        viz->custo = custo;
-        viz->id_viz = no2->id_no;
-    }
-}
-void removeAresta(TG * g, int no1, int no2){
-    TViz aresta = buscaAresta(g,no1,no2);
-    if(aresta){
-    TViz * r = aresta; 
-    aresta = aresta->prox_viz;
-    free(r);
-    }
-}
-void imprime (TG* g){
-    TNO * p = g-> prim;
-    while(p){
-        printf("%d \n", p->id_no);
-        TViz * v = p->prim_viz;
-        while(v){
-        printf("viz: %d \t custo %d",v->id_viz, v->custo);
-        v=v->prox_viz;"
-        }
-    }
-    p=p->prox_no;
-        
-}
-void libera (TG * g){
-    TNO * no = g->prim;
-    while(no){
-        TViz aresta = no->prim_viz;
-        while(aresta){
-            TViz aux = aresta; 
-            aresta = aresta->prox_viz;
-            free(aux); 
-        }
-        g->prim = no->prox_no;
-        TNO aux_no = no;
-        no = no->prox_no;
-        free(aux_no);
-    }
-}
+TNO * buscaNo(TG * g, int elem){};
+void removeNO(TG * g, int elem){};
+void removeAresta(TG * g, int no1, int no2){};
+TViz * buscaAresta(TG * g, int no1, int no2){};
 
 /**            PERGUNTAS PRA FAZER PRA TIA BEBEL <3
 +Perguntar se podem existir nos com valores repetidos em um grafo R: Não
@@ -288,10 +145,10 @@ void pintaSub(TG * g, int no){//pinta toda a componente conexa
 
 
 /**TODO
+                      Encontrando pontes
 
 Remove uma aresta do grafo
 Procura um caminho do no V ate o no W
-                      Encontrando pontes
     se existe caminho, nao e uma ponte
     se nao, e uma ponte
 Insere a aresta novamente
