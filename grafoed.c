@@ -258,10 +258,10 @@ TG * criaGrafo(char * nomeArq){
 
 	fclose(fp);
 	return g;
- }
+}s
 
- int main(void){
- char * nomeArq = (char*)malloc(100);
+int main(void){
+ char * nomeArq = (char*  )malloc(100);
  printf("Digite o nome do arquivo: ");
  scanf("%s", nomeArq);
 
