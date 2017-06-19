@@ -36,20 +36,19 @@ int checaOrientacao(TG * g){
   while(p){
     TViz * v = p->prim_viz;
     while(v){
-
       TNO * vizinho = buscaNo(g,v->id_viz);
       TViz * vizinhosBusca = vizinho->prim_viz;
-
-      while((vizinhosBusca->id_viz != p->id_no)&&(vizinhosBusca)){
-        if(!vizinhosBusca) return 1;
+      while((vizinhosBusca)&&(vizinhosBusca->id_viz != p->id_no)){
         vizinhosBusca = vizinhosBusca->prox_viz;
       }
+      if(!vizinhosBusca) return 1;
       v=v->prox_viz;
     }
     p=p->prox_no;
   }
   return 0;
 }
+
 /**
             Verificando se V alcanca W(procurando W a partir de V)
 
@@ -130,41 +129,59 @@ int conexo(TG * g){
   if(!g) return 0;
   TNO * p = g->prim;
   if(!p->prox_no) return 1;
-  int cor = g->numCores;
+  int cor;
+  if(p->cor) cor = p->cor;
+  else cor = g->numCores;
   p->cor = cor;
   int resp = 1;
-  while(p){
-    TNO * q = g->prim;
-
-    while(q){
-      if(q->id_no!=p->id_no){
-
-        if(procuraCaminho(g,p->id_no,q->id_no)){
-          if(q->cor != p->cor) g->numCores--;
-          q->cor = p->cor;
+  TNO * q = g->prim;
+  while(q){
+    if(q->id_no!=p->id_no){
+      if(procuraCaminho(g,p->id_no,q->id_no)){
+        if((q->cor)&&(q->cor!=cor)){
+          g->numCores--;
+        }
+        q->cor = cor;
         }
 
         else if (!procuraCaminho(g,p->id_no,q->id_no)){
           if(!q->cor){
             int pintar = verificaCor(g,q->id_no);
             if(!pintar){
-              g->numCores++;
+              g->numCores=g->numCores++;
               cor=g->numCores;
               q->cor = cor;
             }
-            else pintaSub(g,q->id_no);
-
           }
+        else{
+          cor++;
+          g->numCores = cor;
+          q->cor = cor;
+          pintaSub(g,q->id_no);
+        }
           resp = 0;
         }
       }
       q=q->prox_no;
     }
+    return resp;
   }
-  return resp;
+
+
+void imprimeConexo(TG * g){
+  int total = g->numCores;
+  int i = 1;
+  printf("Total de componentes conexas: %d\n",g->numCores);
+  while(i<total+1){
+    TNO * p = g->prim;
+    while(p){
+      if(p->cor == i) printf("Componente %d: %d\n", i, p->id_no);
+      p=p->prox_no;
+    }
+    i++;
+  }
+  i=1;
 }
-
-
 
 
 /**TODO
@@ -184,21 +201,25 @@ void achaPontes(TG * g){
     while(p && (!p->prim_viz)) p = p->prox_no;
     if(!p) return;
     TViz * v = p->prim_viz;
-
+    TNO * noAux = buscaNo(g,v->id_viz);
     int primAresta = v->id_viz;
     int aux;
     do{
       aux = v->id_viz;
       removeAresta(g,p->id_no,aux);
       int caminho = procuraCaminho(g,p->id_no,aux);
-      if(!caminho){
-        printf("%d faz ponte com %d",p->id_no,aux);
+      if(!caminho && ((!p->ponte)||(!noAux->ponte))){
+        printf("%d faz ponte com %d\n",p->id_no,aux);
+        p->ponte =1;
+        noAux->ponte = 1;
       }
       insereAresta(g,p->id_no,aux,0);
     }while(aux!=primAresta);
-
     p=p->prox_no;
+
   }
+  p = g->prim;
+  while(p){ p->ponte = 0; p=p->prox_no;}
 }
 
 /**TODO
@@ -213,8 +234,6 @@ ai eu crio uma função imprime que imprime todos os nos que tiverem a mesma cor
 */
 void fortementeConexa(TG * g){
   TNO * no1 = g->prim;
-  int corNo1 = no1->cor;
-  int totalCores = g->numCores;
   while(no1){
     TNO * no2 = g->prim;
     if(no1!= no2){
@@ -222,7 +241,7 @@ void fortementeConexa(TG * g){
         int vTow = procuraCaminho(g, no1->id_no, no2->id_no);
         int wTov = procuraCaminho(g, no2->id_no, no1->id_no);
         if(vTow && wTov){
-          no2->cor = corNo1;
+          no2->cor = no1->cor;
         }
         else
         no2 = no2->prox_no;
@@ -231,51 +250,110 @@ void fortementeConexa(TG * g){
   no1 = no1->prox_no;
   }
 }
-
 TG * criaGrafo(char * nomeArq){
-	printf("Criando grafo");
-	FILE * fp;
-	fp = fopen("grafo.txt","rt");
+    FILE * fp;
+    fp = fopen("grafo.txt","rt");
 
-	if(!fp) {printf("EXIT\n");exit(1);}
-	printf("Abriu\n");
-	int numNos,no1,no2,n=0,read;
-	fscanf(fp,"%d",&numNos);
-	printf("Inicializando grafo\n");
-	TG* g = inicializa();
+    if(!fp) exit(1);
+    int numNos,no1,no2,n=0,read;
+    fscanf(fp,"%d",&numNos);
+    TG* g = inicializa();
+    while(n<numNos){
+      insereNo(g,n+1);
+      n++;
+    }
+    read = fscanf(fp,"%d %d",&no1,&no2);
 
-	read = fscanf(fp,"%d %d",&no1,&no2);
-	printf("%d %d\n", no1, no2);
-	printf("%d cores\n",g->numCores);
+	  while(read!=EOF){
+      //insereNo(g,no1);
+	    //if(!buscaNo(g,no2)) insereNo(g,no2);
+      insereAresta(g,no1,no2,0);
+      read = fscanf(fp,"%d %d",&no1,&no2);
+    }
 
-	while(read!=EOF){
-		insereNo(g,no1);
-		printf("Inserindo Aresta");
-		if(!buscaNo(g,no2)) insereNo(g,no2);
-		insereAresta(g,no1,no2,0);
-		read = fscanf(fp,"%d %d",&no1,&no2);
-	}
+    fclose(fp);
+    return g;
+}
 
-	fclose(fp);
-	return g;
- }
+int main(void){
+  char * nomeArq = (char*)malloc(100);
 
- int main(void){
- char * nomeArq = (char*)malloc(100);
- printf("Digite o nome do arquivo: ");
- scanf("%s", nomeArq);
+  printf("Digite o nome do arquivo: ");
+  scanf("%s", nomeArq);
 
- TG * l = NULL;
- printf("Entrando em cria grafo");
- l = criaGrafo(nomeArq);
- printf("Grafo criado!\n");
- imprime(l);
+  TG * g = NULL;
+  g = criaGrafo(nomeArq);
+  printf("Grafo criado!\n");
+  imprime(g);
+  int or = checaOrientacao(g);
+  int opcao;
+  while(opcao!=-1){
+		printf("DIGITE O NUMERO DA ACAO DESEJADA:\n 1.Adicionar um no.\n 2.Adicionar uma aresta/Alterar custo.\n 3.Ver informacao de um no.\n 4.Imprimir o grafo.\n 5.Imprimir componentes conexas.\n 6.Imprimir pontes.\n 7.Imprimir pontos de articulacao.\n 8.Imprimir componentes fortemente conexas.\n 9. Remover um no.\n 10.Remover uma aresta\n -1. Sair\n");
+		scanf("%d",&opcao);
+    if(opcao == 1){
+      printf("Digite o numero do no: ");
+      int addNo;
+      scanf(" %d", &addNo);
+      insereNo(g,addNo);
+      or = checaOrientacao(g);
+    }
+    else if(opcao == 2){
+      int origem, destino,custo;
+      printf("\nDigite o no origem: ");
+      scanf(" %d", &origem);
+      printf("\nDigite o no destino: ");
+      scanf(" %d", &destino);
+      printf("\nDigite o custo(caso nao haja, digite 0): ");
+      scanf(" %d",&custo);
+      insereAresta(g,origem,destino,custo);
+      or = checaOrientacao(g);
+    }
+    else if(opcao == 3){
+      printf("\nDigite o no desejado: ");
+      int infoNo;
+      scanf(" %d", &infoNo);
+      imprimeNo(g,infoNo);
+    }
+    else if(opcao == 4){
+      imprime(g);
+      if(!or) printf("GRAFO NAO-ORIENTADO\n");
+      else printf("GRAFO ORIENTADO\n");
+    }
+    else if(opcao == 5){
+      int cox;
+      cox = conexo(g);
+      if(!cox) printf("GRAFO NAO CONEXO");
+      else printf("GRAFO CONEXO");
+      imprimeConexo(g);
+    }
+    else if(opcao == 6){
+      if(!or) achaPontes(g);
+      else printf("ESSA OPERACAO SO E VALIDA PARA GRAFOS NAO ORIENTADOS!!");
+    }
+    else if(opcao == 7){printf("void");}
+    else if(opcao == 8){printf("void");}
+    else if(opcao == 9){
+      int delNo;
+      printf("\nDigite o no a ser removido: ");
+      scanf(" %d", &delNo);
+      removeNo(g,delNo);
+      or = checaOrientacao(g);
+    }
+    else if(opcao == 10){
+      int delArestaOrg, delArestaDest;
+      printf("\nDigite o no origem: ");
+      scanf(" %d", &delArestaOrg);
+      printf("\nDigite o destino: ");
+      scanf(" %d", &delArestaDest);
+      removeAresta(g,delArestaOrg,delArestaDest);
+      or = checaOrientacao(g);
+    }
+    else if(opcao == -1){exit(1);}
+    else{
+			printf("Voce digitou um numero invalido! Tente novamente.\n");
+		}
 
- return 0;
-
-
-
-
-
-
+    printf("\n");
+  }
+  return 0;
 }
