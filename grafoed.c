@@ -231,46 +231,47 @@ void fortementeConexa(TG * g){
   no1 = no1->prox_no;
   }
 }
+
 TG * criaGrafo(char * nomeArq){
-    printf("Criando grafo");
-    FILE * fp;
-    fp = fopen("grafo.txt","rt");
+	printf("Criando grafo");
+	FILE * fp;
+	fp = fopen("grafo.txt","rt");
 
-    if(!fp) {printf("EXIT\n");exit(1);}
+	if(!fp) {printf("EXIT\n");exit(1);}
 	printf("Abriu\n");
-    int numNos,no1,no2,n=0,read;
-    fscanf(fp,"%d",&numNos);
-    printf("Inicializando grafo\n");
-    TG* g = inicializa();
+	int numNos,no1,no2,n=0,read;
+	fscanf(fp,"%d",&numNos);
+	printf("Inicializando grafo\n");
+	TG* g = inicializa();
 
-    read = fscanf(fp,"%d %d",&no1,&no2);
+	read = fscanf(fp,"%d %d",&no1,&no2);
 	printf("%d %d\n", no1, no2);
 	printf("%d cores\n",g->numCores);
-    
+
 	while(read!=EOF){
-      insereNo(g,no1);
-	  printf("Inserindo Aresta");
-	  if(!buscaNo(g,no2)) insereNo(g,no2);
-      insereAresta(g,no1,no2,0);
-      read = fscanf(fp,"%d %d",&no1,&no2);
-    }
+		insereNo(g,no1);
+		printf("Inserindo Aresta");
+		if(!buscaNo(g,no2)) insereNo(g,no2);
+		insereAresta(g,no1,no2,0);
+		read = fscanf(fp,"%d %d",&no1,&no2);
+	}
 
-    fclose(fp);
-    return g;
-}
+	fclose(fp);
+	return g;
+ }
 
-int main(void){
-  char * nomeArq = (char*)malloc(100);
-  printf("Digite o nome do arquivo: ");
-  scanf("%s", nomeArq);
-  
-  TG * l = NULL;
-  printf("Entrando em cria grafo");
-  l = criaGrafo(nomeArq);
-  printf("Grafo criado!\n");
-  imprime(l);
+ int main(void){
+ char * nomeArq = (char*)malloc(100);
+ printf("Digite o nome do arquivo: ");
+ scanf("%s", nomeArq);
 
-  return 0;
+ TG * l = NULL;
+ printf("Entrando em cria grafo");
+ l = criaGrafo(nomeArq);
+ printf("Grafo criado!\n");
+ imprime(l);
+
+ return 0;
 
 
 
