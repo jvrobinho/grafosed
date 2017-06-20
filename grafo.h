@@ -32,7 +32,7 @@ TG * inicializa(void){
 void imprime(TG * g){
     TNO * p = g->prim;
     while(p){
-        printf("%d \n", p->id_no);
+        printf("\n[%d] \n", p->id_no);
         TViz * v = p->prim_viz;
         while(v){
             printf("viz: %d \t custo: %d\n", v->id_viz, v->custo);
@@ -171,4 +171,15 @@ void imprimeNo(TG * g, int id){
       printf("viz: %d \t custo: %d\n", v->id_viz, v->custo);
       v=v->prox_viz;
   }
+}
+
+void imprimeAresta(TG * g, int id1, int id2){
+	if(!g) return;
+	TNO * no1 = buscaNo(g,id1);
+  if(!no1) return;
+	TNO * no2 = buscaNo(g, id2);
+  if(!no2) return;
+	TViz * v = buscaAresta(g, id1, id2);
+	if(!v) return;
+	printf("O no %d esta ligado ao no %d\n", id1, id2);
 }
