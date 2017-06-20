@@ -207,6 +207,7 @@ void achaPontes(TG * g){
     do{
       aux = v->id_viz;
       removeAresta(g,p->id_no,aux);
+	  removeAresta(g,aux,p->id_no);
       int caminho = procuraCaminho(g,p->id_no,aux);
       if(!caminho && ((!p->ponte)||(!noAux->ponte))){
         printf("%d faz ponte com %d\n",p->id_no,aux);
@@ -214,6 +215,7 @@ void achaPontes(TG * g){
         noAux->ponte = 1;
       }
       insereAresta(g,p->id_no,aux,0);
+	  insereAresta(g,aux,p->id_no,0);
     }while(aux!=primAresta);
     p=p->prox_no;
 
@@ -251,49 +253,6 @@ void fortementeConexa(TG * g){
   }
 }
 TG * criaGrafo(char * nomeArq){
-<<<<<<< HEAD
-	printf("Criando grafo");
-	FILE * fp;
-	fp = fopen("grafo.txt","rt");
-
-	if(!fp) {printf("EXIT\n");exit(1);}
-	printf("Abriu\n");
-	int numNos,no1,no2,n=0,read;
-	fscanf(fp,"%d",&numNos);
-	printf("Inicializando grafo\n");
-	TG* g = inicializa();
-
-	read = fscanf(fp,"%d %d",&no1,&no2);
-	printf("%d %d\n", no1, no2);
-	printf("%d cores\n",g->numCores);
-
-	while(read!=EOF){
-		insereNo(g,no1);
-		printf("Inserindo Aresta");
-		if(!buscaNo(g,no2)) insereNo(g,no2);
-		insereAresta(g,no1,no2,0);
-		read = fscanf(fp,"%d %d",&no1,&no2);
-	}
-
-	fclose(fp);
-	return g;
-}s
-
-int main(void){
- char * nomeArq = (char*  )malloc(100);
- printf("Digite o nome do arquivo: ");
- scanf("%s", nomeArq);
-
- TG * l = NULL;
- printf("Entrando em cria grafo");
- l = criaGrafo(nomeArq);
- printf("Grafo criado!\n");
- imprime(l);
-
- return 0;
-
-
-=======
     FILE * fp;
     fp = fopen("grafo.txt","rt");
 
@@ -306,7 +265,6 @@ int main(void){
       n++;
     }
     read = fscanf(fp,"%d %d",&no1,&no2);
->>>>>>> 944f9c2158744cd55c7c0fb35ffdeff5b99d27bc
 
 	  while(read!=EOF){
       //insereNo(g,no1);
@@ -318,22 +276,7 @@ int main(void){
     fclose(fp);
     return g;
 }
-int pontoDeArticulacao(TG * g, int elem){
-  if(!g)return;
-  if(!g->prim)return;
-  TNO art = buscaNo(g,elem);
-  
-  if(!art)return;
-  conexo(g);
-  int num = g-> numCores;
-  removeNo(elem);
-  conexo(g);
-  if (num == g->numCores){
-    return 0;
-  }else{
-    return 1;
-  }
-}
+
 int main(void){
   char * nomeArq = (char*)malloc(100);
 
@@ -375,6 +318,7 @@ int main(void){
     }
     else if(opcao == 4){
       imprime(g);
+	  or = checaOrientacao(g);
       if(!or) printf("GRAFO NAO-ORIENTADO\n");
       else printf("GRAFO ORIENTADO\n");
     }
@@ -389,8 +333,19 @@ int main(void){
       if(!or) achaPontes(g);
       else printf("ESSA OPERACAO SO E VALIDA PARA GRAFOS NAO ORIENTADOS!!");
     }
-    else if(opcao == 7){printf("void");}
-    else if(opcao == 8){printf("void");}
+    else if(opcao == 7){
+		or = checaOrientacao(g);
+		if(!or) imprimeArticulacao(g);
+		else printf("ESSA OPERACAO SO E VALIDA PARA GRAFOS NAO ORIENTADOS!!");
+		}
+    else if(opcao == 8){
+		or = checaOrientacao(g);
+		if(or){
+			fortementeConexa(g);
+			imprimeForte(g);
+		}
+		else printf("ESSA OPERACAO SO E VALIDA PARA GRAFOS ORIENTADOS!!");
+		
     else if(opcao == 9){
       int delNo;
       printf("\nDigite o no a ser removido: ");

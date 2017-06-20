@@ -67,7 +67,7 @@ void insereNo(TG * g, int elem){
     TNO * no = (TNO*)malloc(sizeof(TNO));
     no->id_no = elem;
     no->cor = 0;
-
+	no->ponte = 0;
     no->prim_viz = NULL;
     if(!g->prim){
       g->prim = no;
