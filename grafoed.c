@@ -101,10 +101,11 @@ void pintaSub(TG * g, int no){//pinta toda a componente conexa
   TNO * no1 = buscaNo(g, no);
   if(!no1) return;
   if(!no1->cor) no1->cor = cor;
+	
   TViz * a = no1->prim_viz;
   while(a){
     TNO * viz = buscaNo(g,a->id_viz);
-    if(!viz->cor) viz->cor = cor;
+    if(viz->cor!=cor)viz->cor = cor;
     pintaSub(g,a->id_viz);
     a=a->prox_viz;
   }
@@ -135,14 +136,17 @@ int conexo(TG * g){
   p->cor = cor;
   int resp = 1;
   TNO * q = g->prim;
+	int corAnt;
   while(q){
     if(q->id_no!=p->id_no){
       if(procuraCaminho(g,p->id_no,q->id_no)){
-        if((q->cor)&&(q->cor!=cor)){
+        if((q->cor)&&(q->cor!=cor)&&(q->cor!=corAnt)){
           g->numCores--;
+					corAnt = q->cor;
         }
-        q->cor = cor;
-        }
+        q->cor = cor;		
+			}
+      
 
         else if (!procuraCaminho(g,p->id_no,q->id_no)){
           if(!q->cor){
@@ -153,12 +157,12 @@ int conexo(TG * g){
               q->cor = cor;
             }
           }
-        else{
-          cor++;
-          g->numCores = cor;
-          q->cor = cor;
-          pintaSub(g,q->id_no);
-        }
+					else{
+						cor++;
+						g->numCores = cor;
+						q->cor = cor;
+						pintaSub(g,q->id_no);
+					}
           resp = 0;
         }
       }
@@ -182,6 +186,8 @@ void imprimeConexo(TG * g){
   }
   i=1;
 }
+
+
 
 
 /**TODO
@@ -234,24 +240,89 @@ Se elas forem fortemente conexas, eu so pinto elas da mesma cor,
 ai eu crio uma função imprime que imprime todos os nos que tiverem a mesma cor.
 
 */
+
+void pintaSubForte(TG * g,int id_no){
+  if(!g) return;
+  int cor = g->numCores;
+  TNO * no1 = buscaNo(g, id_no);
+  if(!no1) return;
+  if(!no1->cor) no1->cor = cor;
+  TViz * a = no1->prim_viz;
+	while(a){
+    TNO * viz = buscaNo(g,a->id_viz);
+		if(procuraCaminho(g,no1->id_no,viz->id_no) && procuraCaminho(g,viz->id_no,no1->id_no) )
+			if(!viz->cor){
+				viz->cor = cor;
+				pintaSubForte(g,a->id_viz);
+			}	
+    a=a->prox_viz;
+  }
+  return;
+}
+
+int verificaCorForte(TG * g,int id){
+  if(!g) return 0;
+
+  TNO * no1 = buscaNo(g, id);
+  if(!no1) return 0;
+
+  TNO * no2 = g->prim;
+  while(no2){
+    if(procuraCaminho(g,no1->id_no,no2->id_no) && procuraCaminho(g,no2->id_no,no1->id_no) && (no2->cor!=no1->cor)) return no2->cor;
+    no2=no2->prox_no;
+  }
+  return 0;
+}
+
 void fortementeConexa(TG * g){
   TNO * no1 = g->prim;
+  int cor;
+  if(no1->cor) cor = no1->cor;
+  else cor = g->numCores;
+	no1->cor = cor;
+	int corAnt;
   while(no1){
     TNO * no2 = g->prim;
-    if(no1!= no2){
+    if(no1->id_no != no2->id_no){
       while(no2){
+				if(no1->id_no != no2->id_no){
         int vTow = procuraCaminho(g, no1->id_no, no2->id_no);
         int wTov = procuraCaminho(g, no2->id_no, no1->id_no);
-        if(vTow && wTov){
-          no2->cor = no1->cor;
-        }
-        else
+				
+					if(vTow && wTov){
+						if(no2->cor && (no2->cor != no1->cor) && no2->cor!=corAnt){
+							g->numCores--;
+							corAnt=no2->cor;
+						}
+						no2->cor = no1->cor;						
+					}
+					else{
+						int pintar = verificaCorForte(g,no2->id_no);
+						if(!no2->cor){	
+							if(!pintar){
+							 g->numCores++;
+							 cor=g->numCores;
+							 no2->cor = cor;
+							}
+						}
+						
+						else if(no1->cor == no2->cor){
+							if(!pintar){
+								g->numCores++;
+								cor = g->numCores;
+								no2->cor = cor;						
+							}
+						}
+					}
+				
+				}
         no2 = no2->prox_no;
-      }
+			}
     }
-  no1 = no1->prox_no;
-  }
+		no1 = no1->prox_no;
+	}
 }
+
 int pontoDeArticulacao(TG * g, int elem){
   if(!g)return 0;
   if(!g->prim)return 0;
@@ -290,7 +361,6 @@ void imprimeForte(TG *g){
     }
     i++;
   }
-  i=1;
 }
 
 
@@ -319,8 +389,7 @@ TG * criaGrafo(char * nomeArq){
 
 int main(int argc, char*argv[]){
 
-  TG * g = NULL;
-  g = criaGrafo(argv[1]);
+  TG * g = criaGrafo(argv[1]);
   printf("Grafo criado!\n");
   imprime(g);
   int or = checaOrientacao(g);
@@ -370,15 +439,20 @@ int main(int argc, char*argv[]){
       else printf("GRAFO ORIENTADO\n");
     }
     else if(opcao == 5){
-      int cox;
-      cox = conexo(g);
-      if(!cox) printf("GRAFO NAO CONEXO");
-      else printf("GRAFO CONEXO");
-      imprimeConexo(g);
-    }
+			or = checaOrientacao(g);
+			if(!or){
+				int cox = conexo(g);
+				if(!cox) printf("GRAFO NAO CONEXO");
+				else printf("GRAFO CONEXO");
+				imprimeConexo(g);
+			}
+			else printf("ESSA OPERACAO SO E VALIDA PARA GRAFOS NAO ORIENTADOS!!");
+		}
     else if(opcao == 6){
-      if(!or) achaPontes(g);
+      or = checaOrientacao(g);
+			if(!or) achaPontes(g);
       else printf("ESSA OPERACAO SO E VALIDA PARA GRAFOS NAO ORIENTADOS!!");
+			
     }
     else if(opcao == 7){
 		or = checaOrientacao(g);

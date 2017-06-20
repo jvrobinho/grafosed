@@ -67,7 +67,7 @@ void insereNo(TG * g, int elem){
     TNO * no = (TNO*)malloc(sizeof(TNO));
     no->id_no = elem;
     no->cor = 0;
-	no->ponte = 0;
+		no->ponte = 0;
     no->prim_viz = NULL;
     if(!g->prim){
       g->prim = no;
@@ -94,8 +94,6 @@ void insereAresta(TG * g, int no1, int no2, int custo){
       return;
     }
 
-
-
     viz = (TViz*) malloc (sizeof(TViz));
     viz->custo = custo;
     viz->id_viz = n2->id_no;
@@ -116,6 +114,7 @@ void removeAresta(TG * g, int no1, int no2){
   if(!no1) return;
   TNO * n2 = buscaNo(g,no2);
   if(!no2) return;
+	if(!buscaAresta(g,no1,no2)) return;
   TViz * v = n1->prim_viz, *ant = NULL;
   while(v && (v->id_viz != no2)){
     ant = v;
@@ -126,24 +125,30 @@ void removeAresta(TG * g, int no1, int no2){
   else ant->prox_viz = v->prox_viz;
   free(v);
 }
+
 void removeNo(TG * g, int id){
-  TNO * p= g->prim, *ant = NULL;
+	if(!g->prim->prox_no){
+		printf("\nNao e possivel remover o unico no do grafo");
+		return;
+	}
+	TNO * p= g->prim, *ant = NULL;
   while((p) && (p->id_no!= id)){
     ant = p;
     p=p->prox_no;
   }
   if(!p) return;
+	
   TViz * v = p->prim_viz;
   while(v){
-    removeAresta(g,id,v->id_viz);
+		removeAresta(g,v->id_viz,p->id_no);
+		removeAresta(g,p->id_no,v->id_viz);
     v=p->prim_viz;
   }
-  if(!ant) g->prim = p->prox_no;
+  if(!ant) g->prim = g->prim->prox_no;
   else ant->prox_no = p->prox_no;
   free(p);
   return;
 }
-
 
 void libera (TG * g){
     TNO * no = g->prim;
