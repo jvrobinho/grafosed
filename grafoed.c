@@ -29,6 +29,68 @@ Implementado mais facilmente usando buscaAresta
 
 */
 
+
+void visitado(TG * g, int elem){
+  if(!g) return;
+  TNO * no = g->prim;
+  while(no){
+    TViz * ar = no->prim_viz;
+    while(ar){
+      if (elem == ar->id_viz) {
+        ar->passou = 1;
+      }
+      ar = ar->prox_viz;
+    }
+    no = no->prox_no;
+  }
+}
+
+
+void col (TG *g,int elem,int cor){
+    if (!g) return;
+    TNO * no = buscaNo(g,elem);
+    while(no){
+      if (no->cor != cor && no->cor !=-1){
+        no->cor = cor;
+        //visitado(g,no->id_no);
+        TViz * v = no->prim_viz;
+        while(v){
+          col(g,v->id_viz,cor);
+          v = v->prox_viz;
+        }
+      }/* condition */
+      no = no->prox_no;
+    }
+}
+
+void limpaCor(TG*g){
+  if (!g) return;
+  TNO * no = g->prim;
+  while(no){
+    no->cor = 0;
+    no = no->prox_no;
+  }
+}
+
+TG * copiar (TG *g){
+    if (!g) return NULL;
+    TG *novo = inicializa();
+    TNO *no = g->prim;
+    while(no){
+      insereNo(novo,no->id_no);
+      no = no->prox_no;
+    }
+    no = g->prim;
+    while(no){
+      TViz *viz = no->prim_viz;
+      while(viz){
+        insereAresta(novo,no->id_no,viz->id_viz,0);
+        viz = viz->prox_viz;
+      }
+      no = no->prox_no;
+    }
+    return novo;
+}
 int checaOrientacao(TG * g){
   if((!g)||(!g->prim->prim_viz)) return 0;
   TNO * p = g->prim;
@@ -152,7 +214,7 @@ int conexo(TG * g){
           if(!q->cor){
             int pintar = verificaCor(g,q->id_no);
             if(!pintar){
-              g->numCores=g->numCores++;
+              g->numCores++;
               cor=g->numCores;
               q->cor = cor;
             }
@@ -185,6 +247,28 @@ void imprimeConexo(TG * g){
     i++;
   }
   i=1;
+}
+
+int verificaPonto(TG *g, int elem){
+  if (!g) return 0;
+  TG * cop = copiar(g);
+  limpaCor(cop);
+  removeNo(cop,elem);
+  conexo(cop);
+  int cores = g->numCores;
+  if(cores != cop->numCores){return 1;}
+  return 0;
+}
+
+void pontoDeArticulacao(TG * g){
+  if(!g) return;
+  TNO * no = g->prim;
+  while(no){
+    int id = no->id_no;
+    int art = verificaPonto(g, no->id_no);
+    if(art) printf("O no %d e ponto de articulacao\n",id);
+    no=no->prox_no;
+  }
 }
 
 
@@ -277,6 +361,7 @@ int verificaCorForte(TG * g,int id){
 void fortementeConexa(TG * g){
   TNO * no1 = g->prim;
   int cor;
+  printf("G->numCores %d",g->numCores);
   if(no1->cor) cor = no1->cor;
   else cor = g->numCores;
 	no1->cor = cor;
@@ -323,31 +408,6 @@ void fortementeConexa(TG * g){
 	}
 }
 
-int pontoDeArticulacao(TG * g, int elem){
-  if(!g)return 0;
-  if(!g->prim)return 0;
-  TNO * art = buscaNo(g,elem);
-
-  if(!art)return 0 ;
-  conexo(g);
-  int num = g-> numCores;
-  removeNo(g,elem);
-  conexo(g);
-  if (num == g->numCores){
-    return 0;
-  }else{
-    return 1;
-  }
-}
-
-void imprimeArticulacao(TG * g){
-  if(!g) return;
-  TNO * p = g->prim;
-  while(p){
-    if(pontoDeArticulacao(g,p->id_no)) printf("%d e ponto de articulacao", p->id_no);
-    p=p->prox_no;
-  }
-}
 
 void imprimeForte(TG *g){
   if(!g) return;
@@ -362,72 +422,15 @@ void imprimeForte(TG *g){
     i++;
   }
 }
-void limpaPassou(TG*g){ // função que zera o passou e as cores2
-  TNO * no = g->prim;
-  while(no){
-    TViz * ar = no->prim_viz;
-    while(ar){
-      ar->passou = 0;
-      ar = ar->prox_viz;
-    }
-    no->cor2=0;
-    no = no->prox_no;
 
+
+void imprimeArticulacao(TG * g){
+  if(!g) return;
+  TNO * p = g->prim;
+  while(p){
+    if(verificaPonto(g,p->id_no)) printf("%d e ponto de articulacao\n", p->id_no);
+    p=p->prox_no;
   }
-}
-void marcaPassou(TG * g, int elem, int i){
-// função para marcar onde já foi passado. Feita para marcar o ponto a ser ignorado na articulação.
-  TNO * no = g->prim;
-  while(no){
-    TViz * ar = no->prim_viz;
-    while(ar){
-      if (ar->id_viz==elem){
-        ar->passou = i;
-      }
-	}
-  }	
-}
-
-
-int pintaPassou(TG * g, TNO * no,int cor){
-    // função que pinta, com backtracking
-    // função que pode dar merda
-    no->cor2 = cor;
-    TViz * art = no->prim_viz;
-    marcaPassou(g,no->id_no,1);
-    while(art){
-      if(art->passou == 0){
-          TNO*noArt = buscaNo(g,art->id_viz);
-        if(noArt->cor == 0){
-          pintaPassou(g,noArt,cor);
-        }
-      }
-      art = art->prox_viz;
-    }
-    return;
-
-}
-int pontoDeArticulacao(TG * g, int elem){
-  if(!g)return 0;
-  if(!g->prim)return 0;
-  TNO * art = buscaNo(g,elem);
-  limpaPassou(g); // limpa o passou e as cores
-  marcaPassou(g,(int)art->id_no,1); // marca com 1 o elemento que vai ser eliminado.
-  int num  = g->numCores;
-  g->numCores=0;// zera o numero de cores
-  TNO * no = g->prim;
-  int cor = 2;// seta a primeira cor a partir de 2
-  while(no){
-    if(no->cor2 == 0 && art != no){
-      pintaPassou(g,no,cor); /// pinta com a cor que tá no looping
-      cor++;// aumenta o valor da cor
-      g->numCores++;// aumenta o numero de cores
-    }
-    no = no->prox_no;
-
-  }
-  if(g->numCores<num)return 1;
-  return 0; 
 }
 
 TG * criaGrafo(char * nomeArq){
@@ -468,7 +471,7 @@ int main(int argc, char*argv[]){
       int addNo;
       scanf(" %d", &addNo);
       insereNo(g,addNo);
-      or = checaOrientacao(g);
+      //or = checaOrientacao(g);
     }
     else if(opcao == 2){
       int origem, destino,custo;
@@ -483,7 +486,7 @@ int main(int argc, char*argv[]){
     }
     else if(opcao == 3){
 			int opt;
-			printf("Digite 1 para ver o no ou digite 2 para ver a aresta");
+			printf("Digite 1 para ver o no ou digite 2 para ver a aresta: ");
 			scanf(" %d", &opt);
 			if(opt == 1){
 				printf("\nDigite o no desejado: ");
@@ -508,8 +511,8 @@ int main(int argc, char*argv[]){
 			or = checaOrientacao(g);
 			if(!or){
 				int cox = conexo(g);
-				if(!cox) printf("GRAFO NAO CONEXO");
-				else printf("GRAFO CONEXO");
+				if(!cox) printf("\nGRAFO NAO CONEXO");
+				else printf("\nGRAFO CONEXO");
 				imprimeConexo(g);
 			}
 			else printf("ESSA OPERACAO SO E VALIDA PARA GRAFOS NAO ORIENTADOS!!");
@@ -521,10 +524,11 @@ int main(int argc, char*argv[]){
 
     }
     else if(opcao == 7){
-		or = checaOrientacao(g);
-		if(!or) imprimeArticulacao(g);
-		else printf("ESSA OPERACAO SO E VALIDA PARA GRAFOS NAO ORIENTADOS!!");
+    //or = checaOrientacao(g);
+		if(!or) pontoDeArticulacao(g);
+	  else printf("ESSA OPERACAO SO E VALIDA PARA GRAFOS NAO ORIENTADOS!!");
 		}
+
     else if(opcao == 8){
 			or = checaOrientacao(g);
 			if(or){

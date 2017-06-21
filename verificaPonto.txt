@@ -1,0 +1,82 @@
+void limpaCor(TG*g){
+  if (!g) return;
+  TNO * no = g->prim;
+  while(no){
+    TViz * ar = no->prim_viz;
+    while(ar){
+      ar->passou = 0;
+      ar = ar->prox_viz;
+    }
+    no->cor = 0;
+    no = no->prox_no;
+
+  }
+}
+void visitado(TG * g, int elem){
+  if(!g) return;
+  TNO * no = g->prim;
+  while(no){
+    TViz * ar = no->prim_viz;
+    while(ar){
+      if (elem == ar->id_viz) {
+        ar->passou = 1;
+      }
+      ar = ar->prox_viz;
+    }
+    no = no->prox_no;
+  }
+}
+
+void col (TG *g,int elem,int cor){
+    if (!g) return;
+    TNO * no = buscaNo(g,elem);
+    while(no){
+      if (no->cor != cor && no->cor !=-1){
+        no->cor = cor;
+        visitado(g,no->id_no);
+        TViz * v = no->prim_viz;
+        while(v){
+          if (!v->passou) col(g,v->id_viz,cor);
+          v = v->prox_viz;
+        }
+      }/* condition */
+      no = no->prox_no;
+    }
+}
+
+int verificaPonto(TG*g, int elem){
+  limpaCor(g);
+  int cor = 2;
+  TNO * aux = g->prim;
+  g->numCores=0;
+  while (aux) {
+    if (aux->cor == 0){
+          col(g,aux->id_no,cor);
+          g->numCores++;
+          cor++;
+        }
+      aux = aux->prox_no;
+  }
+  limpaCor(g);
+  visitado(g,elem);
+  TNO * no = buscaNo(g,elem);
+  no->cor=-1;
+  cor = 2;
+  int corAnt= g->numCores;
+  g->numCores = 0;
+  aux = g->prim;
+
+  while (aux) {
+      if(aux->id_no!=elem && aux->cor == 0){
+        col(g,aux->id_no,cor);
+        g->numCores++;
+        cor++;
+      }
+      aux = aux->prox_no;
+    }
+
+printf("%d cores antes,%d cores depois\n",corAnt,g->numCores);
+if(corAnt < (g->numCores)) return 1;
+return 0;
+
+}

@@ -11,7 +11,6 @@ typedef struct no{
   int id_no;
   int cor;
   int ponte;
-  int cor2;
   TViz * prim_viz;
   struct no * prox_no;
 }TNO;
@@ -21,7 +20,11 @@ typedef struct grafo{
   int numCores;
 }TG;
 
-
+typedef struct salvaGrafo{
+  int id_no;
+  TViz * aponta;
+  TNO * apontados;
+}SG;
 
 TG * inicializa(void){
   TG * g = (TG*)malloc(sizeof(TG));
@@ -129,7 +132,7 @@ void removeAresta(TG * g, int no1, int no2){
 
 void removeNo(TG * g, int id){
 	if(!g->prim->prox_no){
-		printf("\nNao e possivel remover o unico no do grafo");
+		printf("\nNao e possivel remover o unico no do grafo %d\n",id);
 		return;
 	}
 	TNO * p= g->prim, *ant = NULL;
@@ -162,7 +165,7 @@ void libera (TG * g){
         }
         g->prim = no->prox_no;
         TNO * aux_no = no;
-        no = no->prox_no;
+        no = no->prox_no;//no=g->prim;
         free(aux_no);
     }
 }
