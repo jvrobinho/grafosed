@@ -618,7 +618,7 @@ int pontoDeArticulacao(TG * g, int elem){
 
   }
   if(g->numCores<num)return 1;
-  return 0;
+  return 0; 
 }
 
 TG * criaGrafo(char * nomeArq){
