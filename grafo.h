@@ -11,6 +11,7 @@ typedef struct no{
   int id_no;
   int cor;
   int ponte;
+  int cor2;
   TViz * prim_viz;
   struct no * prox_no;
 }TNO;
@@ -137,7 +138,7 @@ void removeNo(TG * g, int id){
     p=p->prox_no;
   }
   if(!p) return;
-	
+
   TViz * v = p->prim_viz;
   while(v){
 		removeAresta(g,v->id_viz,p->id_no);

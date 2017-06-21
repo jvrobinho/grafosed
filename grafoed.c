@@ -101,7 +101,7 @@ void pintaSub(TG * g, int no){//pinta toda a componente conexa
   TNO * no1 = buscaNo(g, no);
   if(!no1) return;
   if(!no1->cor) no1->cor = cor;
-	
+
   TViz * a = no1->prim_viz;
   while(a){
     TNO * viz = buscaNo(g,a->id_viz);
@@ -144,9 +144,9 @@ int conexo(TG * g){
           g->numCores--;
 					corAnt = q->cor;
         }
-        q->cor = cor;		
+        q->cor = cor;
 			}
-      
+
 
         else if (!procuraCaminho(g,p->id_no,q->id_no)){
           if(!q->cor){
@@ -254,7 +254,7 @@ void pintaSubForte(TG * g,int id_no){
 			if(!viz->cor){
 				viz->cor = cor;
 				pintaSubForte(g,a->id_viz);
-			}	
+			}
     a=a->prox_viz;
   }
   return;
@@ -288,33 +288,33 @@ void fortementeConexa(TG * g){
 				if(no1->id_no != no2->id_no){
         int vTow = procuraCaminho(g, no1->id_no, no2->id_no);
         int wTov = procuraCaminho(g, no2->id_no, no1->id_no);
-				
+
 					if(vTow && wTov){
 						if(no2->cor && (no2->cor != no1->cor) && no2->cor!=corAnt){
 							g->numCores--;
 							corAnt=no2->cor;
 						}
-						no2->cor = no1->cor;						
+						no2->cor = no1->cor;
 					}
 					else{
 						int pintar = verificaCorForte(g,no2->id_no);
-						if(!no2->cor){	
+						if(!no2->cor){
 							if(!pintar){
 							 g->numCores++;
 							 cor=g->numCores;
 							 no2->cor = cor;
 							}
 						}
-						
+
 						else if(no1->cor == no2->cor){
 							if(!pintar){
 								g->numCores++;
 								cor = g->numCores;
-								no2->cor = cor;						
+								no2->cor = cor;
 							}
 						}
 					}
-				
+
 				}
         no2 = no2->prox_no;
 			}
@@ -362,7 +362,264 @@ void imprimeForte(TG *g){
     i++;
   }
 }
+void limpaPassou(TG*g){ // função que zera o passou e as cores2
+  TNO * no = g->prim;
+  while(no){
+    TViz * ar = no->prim_viz;
+    while(ar){
+      ar->passou = 0;
+      ar = ar->prox_viz;
+    }
+    no->cor2=0;
+    no = no->prox_no;
 
+  }
+}
+void marcaPassou(TG * g, int elem, int i){
+// função para marcar onde já foi passado. Feita para marcar o ponto a ser ignorado na articulação.
+  TNO * no = g->prim;
+  while(no){
+    TViz * ar = no->prim_viz;
+    while(ar){
+      if (ar->id_viz==elem){
+        ar->passou = i;
+      }#include <stdio.h>
+#include <stdlib.h>
+  typedef struct  viz{
+  int id_viz;
+  int custo;
+  int passou;
+  struct viz * prox_viz;
+}TViz;
+
+typedef struct no{
+  int id_no;
+  int cor;
+  int ponte;
+  int cor2;
+  TViz * prim_viz;
+  struct no * prox_no;
+}TNO;
+
+typedef struct grafo{
+  TNO * prim;
+  int numCores;
+}TG;
+
+
+
+TG * inicializa(void){
+  TG * g = (TG*)malloc(sizeof(TG));
+  g->prim = NULL;
+  g->numCores = 1;
+  return g;
+}
+
+void imprime(TG * g){
+    TNO * p = g->prim;
+    while(p){
+        printf("\n[%d] \n", p->id_no);
+        TViz * v = p->prim_viz;
+        while(v){
+            printf("viz: %d \t custo: %d\n", v->id_viz, v->custo);
+            v=v->prox_viz;
+        }
+        p=p->prox_no;
+    }
+}
+
+TNO * buscaNo(TG * g, int no){
+  TNO * p = g->prim;
+  while((p)&&(p->id_no!=no))p=p->prox_no;
+  return p;
+}
+TViz * buscaAresta(TG * g, int no1, int no2){
+    if(!g) return NULL;
+    TNO * n1 = buscaNo(g,no1);
+    if(!n1) return NULL;
+    TNO * n2 = buscaNo(g,no2);
+    if(!n2) return NULL;
+
+    TViz * p = n1->prim_viz;
+    while(p && (p->id_viz != no2))
+      p=p->prox_viz;
+    return p;
+}
+void insereNo(TG * g, int elem){
+    if(!g) return;
+    TNO * aux = buscaNo(g,elem);
+    if(aux) return;
+
+    TNO * no = (TNO*)malloc(sizeof(TNO));
+    no->id_no = elem;
+    no->cor = 0;
+		no->ponte = 0;
+    no->prim_viz = NULL;
+    if(!g->prim){
+      g->prim = no;
+      return;
+    }
+	  aux = g->prim;
+    while(aux->prox_no){
+      aux = aux->prox_no;
+    }
+    aux->prox_no = no;
+    no->prox_no = NULL;
+
+    return;
+}
+
+void insereAresta(TG * g, int no1, int no2, int custo){
+    TNO * n1 = buscaNo(g,no1);
+    if(!n1) return;
+    TNO * n2 = buscaNo(g,no2);
+    if(!n2) return;
+    TViz * viz = buscaAresta(g,no1,no2);
+    if(viz){
+      viz->custo = custo;
+      return;
+    }
+
+    viz = (TViz*) malloc (sizeof(TViz));
+    viz->custo = custo;
+    viz->id_viz = n2->id_no;
+    viz->passou = 0;
+    if(n1->prim_viz){
+      TViz * aux = n1->prim_viz;
+      while(aux->prox_viz) aux = aux->prox_viz;
+      viz->prox_viz = aux->prox_viz;
+      aux->prox_viz = viz;
+      return;
+    }
+    viz->prox_viz = n1->prim_viz;
+    n1->prim_viz = viz;
+    return;
+}
+void removeAresta(TG * g, int no1, int no2){
+  TNO * n1 = buscaNo(g,no1);
+  if(!no1) return;
+  TNO * n2 = buscaNo(g,no2);
+  if(!no2) return;
+	if(!buscaAresta(g,no1,no2)) return;
+  TViz * v = n1->prim_viz, *ant = NULL;
+  while(v && (v->id_viz != no2)){
+    ant = v;
+    v=v->prox_viz;
+  }
+  if(!v) return;
+  if(!ant) n1->prim_viz = v->prox_viz;
+  else ant->prox_viz = v->prox_viz;
+  free(v);
+}
+
+void removeNo(TG * g, int id){
+	if(!g->prim->prox_no){
+		printf("\nNao e possivel remover o unico no do grafo");
+		return;
+	}
+	TNO * p= g->prim, *ant = NULL;
+  while((p) && (p->id_no!= id)){
+    ant = p;
+    p=p->prox_no;
+  }
+  if(!p) return;
+
+  TViz * v = p->prim_viz;
+  while(v){
+		removeAresta(g,v->id_viz,p->id_no);
+		removeAresta(g,p->id_no,v->id_viz);
+    v=p->prim_viz;
+  }
+  if(!ant) g->prim = g->prim->prox_no;
+  else ant->prox_no = p->prox_no;
+  free(p);
+  return;
+}
+
+void libera (TG * g){
+    TNO * no = g->prim;
+    while(no){
+        TViz * aresta = no->prim_viz;
+        while(aresta){
+            TViz * aux = aresta;
+            aresta = aresta->prox_viz;
+            free(aux);
+        }
+        g->prim = no->prox_no;
+        TNO * aux_no = no;
+        no = no->prox_no;
+        free(aux_no);
+    }
+}
+
+void imprimeNo(TG * g, int id){
+  if(!g)return;
+  TNO * p = buscaNo(g,id);
+  if(!p) return;
+  printf("No %d \n Cor: %d \n", p->id_no, p->cor);
+  TViz * v = p->prim_viz;
+  while(v){
+      printf("viz: %d \t custo: %d\n", v->id_viz, v->custo);
+      v=v->prox_viz;
+  }
+}
+
+void imprimeAresta(TG * g, int id1, int id2){
+	if(!g) return;
+	TNO * no1 = buscaNo(g,id1);
+  if(!no1) return;
+	TNO * no2 = buscaNo(g, id2);
+  if(!no2) return;
+	TViz * v = buscaAresta(g, id1, id2);
+	if(!v) return;
+	printf("O no %d esta ligado ao no %d\n", id1, id2);
+}
+
+      ar = ar->prox_viz;
+    }
+    no = no->prox_no;
+  }
+}
+int pintaPassou(TG * g, TNO * no,int cor){
+    // função que pinta, com backtracking
+    // função que pode dar merda
+    no->cor2 = cor;
+    TViz art = no->prim_viz;
+    marcaPassou(g,no,1);
+    while(art){
+      if(art->passou == 0){
+          TNO*noArt = buscaNo(g,art->id_viz);
+        if(noArt->cor == 0){
+          pintaPassou(g,noArt,cor);
+        }
+      }
+      art = art->prox_viz;
+    }
+    return;
+
+}
+int pontoDeArticulacao(TG * g, int elem){
+  if(!g)return 0;
+  if(!g->prim)return 0;
+  TNO * art = buscaNo(g,elem);
+  limpaPassou(g); // limpa o passou e as cores
+  marcaPassou(g,art->id_no,1); // marca com 1 o elemento que vai ser eliminado.
+  int num  = g->numCores;
+  g->numCores=0;// zera o numero de cores
+  TNO * no = g->prim;
+  int cor = 2;// seta a primeira cor a partir de 2
+  while(no){
+    if(no->cor2 == 0 && art != no){
+      pintaPassou(g,no,cor); /// pinta com a cor que tá no looping
+      cor++;// aumenta o valor da cor
+      g->numCores++;// aumenta o numero de cores
+    }
+    no = no->prox_no;
+
+  }
+  if(g->numCores<num)return 1;
+  return 0;
+}
 
 TG * criaGrafo(char * nomeArq){
     FILE * fp;
@@ -452,7 +709,7 @@ int main(int argc, char*argv[]){
       or = checaOrientacao(g);
 			if(!or) achaPontes(g);
       else printf("ESSA OPERACAO SO E VALIDA PARA GRAFOS NAO ORIENTADOS!!");
-			
+
     }
     else if(opcao == 7){
 		or = checaOrientacao(g);
@@ -465,7 +722,7 @@ int main(int argc, char*argv[]){
 				fortementeConexa(g);
 				imprimeForte(g);
 			}
-		
+
 			else printf("ESSA OPERACAO SO E VALIDA PARA GRAFOS ORIENTADOS!!");
 		}
     else if(opcao == 9){
