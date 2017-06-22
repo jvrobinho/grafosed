@@ -163,7 +163,6 @@ void pintaSub(TG * g, int no){//pinta toda a componente conexa
   TNO * no1 = buscaNo(g, no);
   if(!no1) return;
   if(!no1->cor) no1->cor = cor;
-	printf("pinta sub de %d\n",no);
   TViz * a = no1->prim_viz;
   while(a){
     TNO * viz = buscaNo(g,a->id_viz);
@@ -219,7 +218,6 @@ int conexo(TG * g){
               g->numCores++;
               cor=g->numCores;
               q->cor = cor;
-							printf("NO %d tem cor %d\n",q->id_no,cor);
 							pintaSub(g,q->id_no);
             }
           }
@@ -276,7 +274,6 @@ void pontoDeArticulacao(TG * g){
 
   while(no){
     int id = no->id_no;
-		printf("Verificando o no %d",id);
     int art = verificaPonto(g, no->id_no);
     if(art) printf("O no %d e ponto de articulacao\n",id);
     no=no->prox_no;
@@ -385,7 +382,6 @@ void fortementeConexa(TG * g){
 				if(no1->id_no != no2->id_no){ 
         int vTow = procuraCaminho(g, no1->id_no, no2->id_no);
         int wTov = procuraCaminho(g, no2->id_no, no1->id_no);
-				printf("%d %d\n",vTow,wTov);
 				if(vTow && wTov){
 						if(no2->cor && (no2->cor != no1->cor)&&no2->cor!=corAnt){
 							g->numCores--;
@@ -480,14 +476,14 @@ int main(int argc, char*argv[]){
   int or = checaOrientacao(g);
   int opcao;
   while(opcao!=-1){
-		printf("\nDIGITE O NUMERO DA ACAO DESEJADA:\n 1.Adicionar um no.\n 2.Adicionar uma aresta/Alterar custo.\n 3.Ver informacao de um no ou aresta.\n 4.Imprimir o grafo.\n 5.Imprimir componentes conexas.\n 6.Imprimir pontes.\n 7.Imprimir pontos de articulacao.\n 8.Imprimir componentes fortemente conexas.\n 9. Remover um no.\n 10.Remover uma aresta\n -1. Sair\n");
+		printf("\nDIGITE O NUMERO DA ACAO DESEJADA:\n 1.Adicionar um no.\n 2.Adicionar uma aresta/Alterar custo.\n 3.Ver informacao de um no ou aresta.\n 4.Imprimir o grafo.\n 5.Imprimir componentes conexas.\n 6.Imprimir pontes.\n 7.Imprimir pontos de articulacao.\n 8.Imprimir componentes fortemente conexas.\n 9.Remover um no.\n 10.Remover uma aresta\n -1. Sair\n");
 		scanf("%d",&opcao);
     if(opcao == 1){
       printf("Digite o numero do no: ");
       int addNo;
       scanf(" %d", &addNo);
       insereNo(g,addNo);
-      //or = checaOrientacao(g);
+      or = checaOrientacao(g);
     }
     else if(opcao == 2){
       int origem, destino,custo;
@@ -511,7 +507,7 @@ int main(int argc, char*argv[]){
 				imprimeNo(g,infoNo);
 			}
 			else if(opt == 2){
-				printf("\nDigite os nos desejados");
+				printf("\nDigite os nos desejados: ");
 				int no1, no2;
 				scanf("%d%d", &no1, &no2);
 				imprimeAresta(g,no1,no2);

@@ -190,5 +190,5 @@ void imprimeAresta(TG * g, int id1, int id2){
   if(!no2) return;
 	TViz * v = buscaAresta(g, id1, id2);
 	if(!v) return;
-	printf("O no %d esta ligado ao no %d\n", id1, id2);
+	printf("O no %d esta ligado ao no %d e tem custo %d\n", id1, id2,v->custo);
 }
