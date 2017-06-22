@@ -34,6 +34,7 @@ TG * inicializa(void){
 }
 
 void imprime(TG * g){
+		if(!g->prim) return;
     TNO * p = g->prim;
     while(p){
         printf("\n[%d] \n", p->id_no);
@@ -132,7 +133,8 @@ void removeAresta(TG * g, int no1, int no2){
 
 void removeNo(TG * g, int id){
 	if(!g->prim->prox_no){
-		printf("\nNao e possivel remover o unico no do grafo %d\n",id);
+		free(g->prim);
+		g->prim=NULL;
 		return;
 	}
 	TNO * p= g->prim, *ant = NULL;

@@ -92,7 +92,7 @@ TG * copiar (TG *g){
     return novo;
 }
 int checaOrientacao(TG * g){
-  if((!g)||(!g->prim->prim_viz)) return 0;
+  if(!g) return 0;
   TNO * p = g->prim;
 
   while(p){
@@ -137,8 +137,8 @@ int procuraCaminho(TG * g, int id1, int id2){
     if(!v->passou){
       v->passou = 1;
       resp = procuraCaminho(g,v->id_viz,id2);
-      v->passou = 0;
     }
+      v->passou = 0;
     v=v->prox_viz;
   }
   return resp;
@@ -211,7 +211,7 @@ int conexo(TG * g){
 			}
 
 
-        else if (!procuraCaminho(g,p->id_no,q->id_no)){
+        else{
           if(!q->cor){
             int pintar = verificaCor(g,q->id_no);
             if(!pintar){
@@ -251,7 +251,6 @@ void imprimeConexo(TG * g){
     }
     i++;
   }
-  i=1;
 }
 
 int verificaPonto(TG *g, int elem){
@@ -448,12 +447,11 @@ void imprimeArticulacao(TG * g){
 TG * criaGrafo(char * nomeArq){
     FILE * fp;
     fp = fopen(nomeArq,"rt");
-
-    if(!fp) exit(1);
+		if(!fp) exit(1);
     int numNos,no1,no2,n=0,read;
     fscanf(fp,"%d",&numNos);
     TG* g = inicializa();
-    while(n<numNos){
+		while(n<numNos){
       insereNo(g,n+1);
       n++;
     }
@@ -469,13 +467,14 @@ TG * criaGrafo(char * nomeArq){
 }
 
 int main(int argc, char*argv[]){
-
-  TG * g = criaGrafo(argv[1]);
+	TG * g = NULL;
+  g = criaGrafo(argv[1]);
   printf("Grafo criado!\n");
   imprime(g);
   int or = checaOrientacao(g);
   int opcao;
   while(opcao!=-1){
+		if(!g->prim) printf("SEU GRAFO ESTA VAZIO!! POR FAVOR, SELECIONE A OPCAO 1  E INSIRA UM NOVO NO!\n");
 		printf("\nDIGITE O NUMERO DA ACAO DESEJADA:\n 1.Adicionar um no.\n 2.Adicionar uma aresta/Alterar custo.\n 3.Ver informacao de um no ou aresta.\n 4.Imprimir o grafo.\n 5.Imprimir componentes conexas.\n 6.Imprimir pontes.\n 7.Imprimir pontos de articulacao.\n 8.Imprimir componentes fortemente conexas.\n 9.Remover um no.\n 10.Remover uma aresta\n -1. Sair\n");
 		scanf("%d",&opcao);
     if(opcao == 1){
@@ -486,6 +485,8 @@ int main(int argc, char*argv[]){
       or = checaOrientacao(g);
     }
     else if(opcao == 2){
+			if(!g->prim) printf("SEU GRAFO ESTA VAZIO!! POR FAVOR, SELECIONE A OPCAO 1  E INSIRA UM NOVO NO!\n");
+			else{
       int origem, destino,custo;
       printf("\nDigite o no origem: ");
       scanf(" %d", &origem);
@@ -495,8 +496,11 @@ int main(int argc, char*argv[]){
       scanf(" %d",&custo);
       insereAresta(g,origem,destino,custo);
       or = checaOrientacao(g);
+			}
     }
     else if(opcao == 3){
+			if(!g->prim) printf("SEU GRAFO ESTA VAZIO!! POR FAVOR, SELECIONE A OPCAO 1  E INSIRA UM NOVO NO!\n");
+			else{
 			int opt;
 			printf("Digite 1 para ver o no ou digite 2 para ver a aresta: ");
 			scanf(" %d", &opt);
@@ -512,52 +516,75 @@ int main(int argc, char*argv[]){
 				scanf("%d%d", &no1, &no2);
 				imprimeAresta(g,no1,no2);
 			}
+			}
     }
     else if(opcao == 4){
-      imprime(g);
+			if(!g->prim) printf("SEU GRAFO ESTA VAZIO!! POR FAVOR, SELECIONE A OPCAO 1  E INSIRA UM NOVO NO!\n");
+			else{
+			imprime(g);
 			or = checaOrientacao(g);
       if(!or) printf("GRAFO NAO-ORIENTADO\n");
       else printf("GRAFO ORIENTADO\n");
+			}
     }
     else if(opcao == 5){
+			if(!g->prim) printf("SEU GRAFO ESTA VAZIO!! POR FAVOR, SELECIONE A OPCAO 1  E INSIRA UM NOVO NO!\n");
+			else{
 			or = checaOrientacao(g);
 			if(!or){
 				int cox = conexo(g);
-				if(!cox) printf("\nGRAFO NAO CONEXO");
-				else printf("\nGRAFO CONEXO");
+				if(!cox) printf("\nGRAFO NAO CONEXO\n");
+				else printf("\nGRAFO CONEXO\n");
 				imprimeConexo(g);
 			}
 			else printf("ESSA OPERACAO SO E VALIDA PARA GRAFOS NAO ORIENTADOS!!");
+			}
 		}
     else if(opcao == 6){
+			if(!g->prim) printf("SEU GRAFO ESTA VAZIO!! POR FAVOR, SELECIONE A OPCAO 1  E INSIRA UM NOVO NO!\n");
+			else{
       or = checaOrientacao(g);
 			if(!or) achaPontes(g);
       else printf("ESSA OPERACAO SO E VALIDA PARA GRAFOS NAO ORIENTADOS!!");
-
+			}
     }
     else if(opcao == 7){
+		if(!g->prim) printf("SEU GRAFO ESTA VAZIO!! POR FAVOR, SELECIONE A OPCAO 1  E INSIRA UM NOVO NO!\n");
+		else{	
     or = checaOrientacao(g);
 		if(!or) pontoDeArticulacao(g);
 	  else printf("ESSA OPERACAO SO E VALIDA PARA GRAFOS NAO ORIENTADOS!!");
 		}
-
+		}
     else if(opcao == 8){
+			if(!g->prim) printf("SEU GRAFO ESTA VAZIO!! POR FAVOR, SELECIONE A OPCAO 1  E INSIRA UM NOVO NO!\n");
+			else{
 			or = checaOrientacao(g);
 			if(or){
 				fortementeConexa(g);
 				imprimeForte(g);
 			}
-
+			
 			else printf("ESSA OPERACAO SO E VALIDA PARA GRAFOS ORIENTADOS!!");
 		}
+		}
     else if(opcao == 9){
+			if(!g->prim) printf("SEU GRAFO ESTA VAZIO!! POR FAVOR, SELECIONE A OPCAO 1  E INSIRA UM NOVO NO!\n");
+			else{
       int delNo;
       printf("\nDigite o no a ser removido: ");
       scanf(" %d", &delNo);
-      removeNo(g,delNo);
-      or = checaOrientacao(g);
+			if(!g->prim->prox_no)
+				removeNo(g,delNo);
+			else{
+				removeNo(g,delNo);
+				or = checaOrientacao(g);
+			}
+			}
     }
     else if(opcao == 10){
+			if(!g->prim) printf("SEU GRAFO ESTA VAZIO!! POR FAVOR, SELECIONE A OPCAO 1  E INSIRA UM NOVO NO!\n");
+			else{
       int delArestaOrg, delArestaDest;
       printf("\nDigite o no origem: ");
       scanf(" %d", &delArestaOrg);
@@ -565,7 +592,8 @@ int main(int argc, char*argv[]){
       scanf(" %d", &delArestaDest);
       removeAresta(g,delArestaOrg,delArestaDest);
       or = checaOrientacao(g);
-    }
+			}
+		}	
     else if(opcao == -1){exit(1);}
     else{
 			printf("Voce digitou um numero invalido! Tente novamente.\n");
