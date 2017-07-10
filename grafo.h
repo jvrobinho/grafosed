@@ -34,7 +34,6 @@ TG * inicializa(void){
 }
 
 void imprime(TG * g){
-		if(!g->prim) return;
     TNO * p = g->prim;
     while(p){
         printf("\n[%d] \n", p->id_no);
@@ -48,12 +47,13 @@ void imprime(TG * g){
 }
 
 TNO * buscaNo(TG * g, int no){
+    
   TNO * p = g->prim;
   while((p)&&(p->id_no!=no))p=p->prox_no;
   return p;
 }
 TViz * buscaAresta(TG * g, int no1, int no2){
-    if(!g) return NULL;
+    if(!g->prim) return NULL;
     TNO * n1 = buscaNo(g,no1);
     if(!n1) return NULL;
     TNO * n2 = buscaNo(g,no2);
@@ -65,7 +65,7 @@ TViz * buscaAresta(TG * g, int no1, int no2){
     return p;
 }
 void insereNo(TG * g, int elem){
-    if(!g) return;
+    
     TNO * aux = buscaNo(g,elem);
     if(aux) return;
 
@@ -76,6 +76,7 @@ void insereNo(TG * g, int elem){
     no->prim_viz = NULL;
     if(!g->prim){
       g->prim = no;
+			g->prim->prox_no = NULL;
       return;
     }
 	  aux = g->prim;
@@ -115,6 +116,7 @@ void insereAresta(TG * g, int no1, int no2, int custo){
     return;
 }
 void removeAresta(TG * g, int no1, int no2){
+  if(!g->prim || !g->prim->prox_no) return;  
   TNO * n1 = buscaNo(g,no1);
   if(!no1) return;
   TNO * n2 = buscaNo(g,no2);
@@ -133,10 +135,12 @@ void removeAresta(TG * g, int no1, int no2){
 
 void removeNo(TG * g, int id){
 	if(!g->prim->prox_no){
-		free(g->prim);
-		g->prim=NULL;
+        TNO * p = g->prim;
+		g->prim = NULL;
+        free(p);
 		return;
 	}
+	if(!g->prim) return;
 	TNO * p= g->prim, *ant = NULL;
   while((p) && (p->id_no!= id)){
     ant = p;
@@ -173,7 +177,7 @@ void libera (TG * g){
 }
 
 void imprimeNo(TG * g, int id){
-  if(!g)return;
+  if(!g->prim)return;
   TNO * p = buscaNo(g,id);
   if(!p) return;
   printf("No %d \n Cor: %d \n", p->id_no, p->cor);
@@ -185,7 +189,7 @@ void imprimeNo(TG * g, int id){
 }
 
 void imprimeAresta(TG * g, int id1, int id2){
-	if(!g) return;
+	if(!g->prim) return;
 	TNO * no1 = buscaNo(g,id1);
   if(!no1) return;
 	TNO * no2 = buscaNo(g, id2);
