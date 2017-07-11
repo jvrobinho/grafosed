@@ -45,7 +45,7 @@ TG * copiar (TG *g){
 			insereNo(novo,no->id_no);
       no = no->prox_no;
     }
-		
+
     no = g->prim;
     while(no){
       TViz *viz = no->prim_viz;
@@ -135,7 +135,7 @@ void pintaSub(TG * g, int no){//pinta toda a componente conexa
     if(viz->cor!=cor){
 			viz->cor = cor;
 			pintaSub(g,a->id_viz);
-		}	
+		}
     a=a->prox_viz;
   }
   return;
@@ -343,10 +343,10 @@ void fortementeConexa(TG * g){
   else cor = g->numCores;
 	no1->cor = cor;
 	int corAnt;
- 
-    TNO * no2 = g->prim;	
+
+    TNO * no2 = g->prim;
       while(no2){
-				if(no1->id_no != no2->id_no){ 
+				if(no1->id_no != no2->id_no){
         int vTow = procuraCaminho(g, no1->id_no, no2->id_no);
         int wTov = procuraCaminho(g, no2->id_no, no1->id_no);
 				if(vTow && wTov){
@@ -357,7 +357,7 @@ void fortementeConexa(TG * g){
 						no2->cor = no1->cor;
 				}
 				else{
-					
+
 					if(!no2->cor){
 						int pintar = verificaCorForte(g,no2->id_no);
 						if(!pintar){
@@ -365,9 +365,9 @@ void fortementeConexa(TG * g){
 							cor=g->numCores;
 							no2->cor = cor;
 							pintaSubForte(g,no2->id_no);
-						}	
+						}
 					}
-					
+
 					else if(no2->cor){
 						int pintar = verificaCorForte(g,no2->id_no);
 						if(!pintar){
@@ -375,16 +375,16 @@ void fortementeConexa(TG * g){
 							g->numCores=cor;
 							no2->cor = cor;
 							pintaSubForte(g,no2->id_no);
-						}	
-					}	
+						}
+					}
 				}
 				}
 				no2 = no2->prox_no;
 			}
 
-}	
-		
-	
+}
+
+
 
 
 
@@ -442,11 +442,11 @@ int main(int argc, char*argv[]){
   int or = checaOrientacao(g);
   int opcao;
   while(opcao!=-1){
-		
-		
+
+
 		printf("\nDIGITE O NUMERO DA ACAO DESEJADA:\n 1.Adicionar um no.\n 2.Adicionar uma aresta/Alterar custo.\n 3.Ver informacao de um no ou aresta.\n 4.Imprimir o grafo.\n 5.Imprimir componentes conexas.\n 6.Imprimir pontes.\n 7.Imprimir pontos de articulacao.\n 8.Imprimir componentes fortemente conexas.\n 9.Remover um no.\n 10.Remover uma aresta\n -1. Sair\n");
 		scanf("%d",&opcao);
-	
+
     if(opcao == 1){
       printf("Digite o numero do no: ");
       int addNo;
@@ -482,14 +482,16 @@ int main(int argc, char*argv[]){
 				imprimeAresta(g,no1,no2);
 			}
     }
-    else if(opcao == 4){    
+    else if(opcao == 4){
         imprime(g);
         or = checaOrientacao(g);
-        if(!or) printf("GRAFO NAO-ORIENTADO\n");
+        if(!or) {
+          printf("GRAFO NAO-ORIENTADO\n");
+          int cox = conexo(g);
+          if(!cox) printf("Grafo não conexo");
+          else printf("Grafo conexo");
+        }
         else printf("GRAFO ORIENTADO\n");
-        int cox = conexo(g);
-        if(!cox) printf("Grafo não conexo");
-        else printf("Grafo conexo");
     }
     else if(opcao == 5){
 			or = checaOrientacao(g);
@@ -497,7 +499,7 @@ int main(int argc, char*argv[]){
 				int cox = conexo(g);
 				if(!cox) imprimeConexo(g);
 				else printf("\nGRAFO CONEXO, OPERACAO INVALIDA\n");
-				
+
 			}
 			else printf("ESSA OPERACAO SO E VALIDA PARA GRAFOS NAO ORIENTADOS!!");
 		}
@@ -508,7 +510,7 @@ int main(int argc, char*argv[]){
 				if(cox)
 					achaPontes(g);
 				else	printf("\nGRAFO NAO CONEXO, OPERACAO INVALIDA\n");
-			}	
+			}
       else printf("ESSA OPERACAO SO E VALIDA PARA GRAFOS NAO ORIENTADOS!!");
 
     }
@@ -518,14 +520,15 @@ int main(int argc, char*argv[]){
 				int cox = conexo(g);
 				if(cox)
 					pontoDeArticulacao(g);
-				else printf("\nGRAFO NAO CONEXO, OPERACAO INVALIDA\n"); 
-		}		
+				else printf("\nGRAFO NAO CONEXO, OPERACAO INVALIDA\n");
+		}
 	  else printf("ESSA OPERACAO SO E VALIDA PARA GRAFOS NAO ORIENTADOS!!");
     }
 
     else if(opcao == 8){
 			or = checaOrientacao(g);
 			if(or){
+        limpaCor(g);
 				fortementeConexa(g);
 				imprimeForte(g);
 			}
@@ -551,8 +554,8 @@ int main(int argc, char*argv[]){
     else if(opcao == -1){exit(1);}
     else
 			printf("Voce digitou um numero invalido! Tente novamente.\n");
-  	
-	
+
+
     printf("\n");
   }
   return 0;
